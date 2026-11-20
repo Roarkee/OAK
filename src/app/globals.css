@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-navy: #172B3A;
+  --color-slate: #263D4A;
+  --color-gold: #B69A67;
+  --color-gold-hover: #A58957;
+  --color-ivory: #F4F3EF;
+  --color-ivory-dark: #ECEAE3;
+  --color-charcoal: #20282D;
+  --color-muted: #7B858B;
+  --color-border: #E7E8E6;
+  --color-white: #FFFFFF;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--color-charcoal);
+  background-color: var(--color-white);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Custom Architectural Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F4F3EF;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #B69A67;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9F8352;
+}
+
+/* Premium Selection Style */
+::selection {
+  background-color: #B69A67;
+  color: #172B3A;
+}
+
+/* Architectural Utilities */
+.bg-navy-pattern {
+  background-color: #172B3A;
+  background-image: radial-gradient(rgba(182, 154, 103, 0.08) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #DFD1B3 0%, #B69A67 50%, #9F8352 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.architectural-border {
+  border-color: rgba(182, 154, 103, 0.25);
+}
+
+.cinematic-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(23, 43, 58, 0.4) 0%,
+    rgba(23, 43, 58, 0.75) 50%,
+    rgba(23, 43, 58, 0.95) 100%
+  );
+}

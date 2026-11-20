@@ -1,0 +1,344 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+}
+
+enum EnquiryStatus {
+  NEW
+  UNDER_REVIEW
+  CONTACTED
+  QUOTATION_SENT
+  CONVERTED
+  CLOSED
+}
+
+enum QuotationStatus {
+  PENDING
+  UNDER_REVIEW
+  QUOTED
+  ACCEPTED
+  DECLINED
+}
+
+enum ApplicationStatus {
+  NEW
+  REVIEWING
+  SHORTLISTED
+  INTERVIEW
+  REJECTED
+  HIRED
+}
+
+enum DocumentCategory {
+  PROFILE
+  CAPABILITY
+  BROCHURE
+  CERTIFICATION
+  OTHER
+}
+
+model AdminUser {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  passwordHash String
+  role         Role          @default(ADMIN)
+  avatar       String?
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  auditLogs    AuditLog[]
+  enquiryNotes EnquiryNote[]
+}
+
+model ProjectCategory {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  projects    Project[]
+}
+
+model Project {
+  id             String          @id @default(cuid())
+  slug           String          @unique
+  title          String
+  categoryId     String
+  category       ProjectCategory @relation(fields: [categoryId], references: [id])
+  location       String
+  status         String          // "Completed", "Ongoing", "Planned"
+  year           String?
+  client         String?
+  scopeOfWork    String?         @db.Text
+  description    String          @db.Text
+  featured       Boolean         @default(false)
+  coverImage     String
+  commencedDate  DateTime?
+  completedDate  DateTime?
+  displayOrder   Int             @default(0)
+  images         ProjectImage[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@index([featured])
+}
+
+model ProjectImage {
+  id           String   @id @default(cuid())
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  imageUrl     String
+  caption      String?
+  isCover      Boolean  @default(false)
+  isRender     Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
+model Service {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  title            String
+  shortDescription String   @db.Text
+  fullDescription  String   @db.Text
+  heroImage        String
+  iconName         String   @default("Building2")
+  scope            String[] // list of scope bullet points
+  capabilities     String[] // key technical capabilities
+  displayOrder     Int      @default(0)
+  published        Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([slug])
+}
+
+model TeamMember {
+  id           String   @id @default(cuid())
+  name         String
+  designation  String
+  department   String
+  bio          String   @db.Text
+  photoUrl     String
+  displayOrder Int      @default(0)
+  linkedinUrl  String?
+  email        String?
+  isLeadership Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CompanyInformation {
+  id                 String   @id @default("singleton")
+  companyName        String   @default("OAKS AFRICA GROUP")
+  tagline            String   @default("Engineering Solutions. Lasting Impact.")
+  overview           String   @db.Text
+  history            String   @db.Text
+  vision             String   @db.Text
+  mission            String   @db.Text
+  coreValues         Json     // Array of { title: string, description: string, icon: string }
+  address            String
+  cityCountry        String   @default("Addis Ababa, Ethiopia")
+  email              String   @default("info@oaksafricagroup.com")
+  phone              String   @default("+251 91 123 4567")
+  whatsapp           String   @default("+251911234567")
+  businessHours      String   @default("Mon - Fri: 8:00 AM - 5:30 PM | Sat: 8:30 AM - 1:00 PM")
+  googleMapsEmbedUrl String?  @db.Text
+  linkedin           String?
+  twitter            String?
+  facebook           String?
+  instagram          String?
+  updatedAt          DateTime @updatedAt
+}
+
+model Enquiry {
+  id              String        @id @default(cuid())
+  referenceNumber String        @unique
+  name            String
+  email           String
+  phone           String
+  company         String?
+  category        String?
+  location        String?
+  budget          String?
+  description     String        @db.Text
+  status          EnquiryStatus @default(NEW)
+  assignedTo      String?
+  notes           EnquiryNote[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model EnquiryNote {
+  id         String    @id @default(cuid())
+  enquiryId  String
+  enquiry    Enquiry   @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  authorId   String?
+  author     AdminUser? @relation(fields: [authorId], references: [id])
+  authorName String
+  content    String    @db.Text
+  createdAt  DateTime  @default(now())
+}
+
+model QuotationRequest {
+  id                    String              @id @default(cuid())
+  referenceNumber       String              @unique
+  name                  String
+  email                 String
+  phone                 String
+  company               String?
+  projectTitle          String
+  category              String
+  location              String
+  scopeOfWork           String              @db.Text
+  technicalSpecs        String?             @db.Text
+  expectedCommenceDate  DateTime?
+  expectedCompletionDate DateTime?
+  estimatedBudget       String?
+  status                QuotationStatus     @default(PENDING)
+  quotationRef          String?
+  quotationAmount       Decimal?            @db.Decimal(12, 2)
+  notes                 String?             @db.Text
+  documents             QuotationDocument[]
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model QuotationDocument {
+  id                 String           @id @default(cuid())
+  quotationRequestId String
+  quotationRequest   QuotationRequest @relation(fields: [quotationRequestId], references: [id], onDelete: Cascade)
+  fileName           String
+  fileUrl            String
+  fileSize           Int?
+  fileType           String?
+  createdAt          DateTime         @default(now())
+}
+
+model JobVacancy {
+  id              String           @id @default(cuid())
+  title           String
+  slug            String           @unique
+  department      String
+  location        String
+  employmentType  String           // "Full-time", "Contract", "Internship"
+  description     String           @db.Text
+  requirements    String[]
+  responsibilities String[]
+  deadline        DateTime?
+  isActive        Boolean          @default(true)
+  applications    JobApplication[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model JobApplication {
+  id             String            @id @default(cuid())
+  vacancyId      String
+  vacancy        JobVacancy        @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  fullName       String
+  email          String
+  phone          String
+  coverLetter    String?           @db.Text
+  resumeUrl      String
+  resumeFileName String
+  status         ApplicationStatus @default(NEW)
+  internalNotes  String?           @db.Text
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([status])
+  @@index([vacancyId])
+}
+
+model NewsCategory {
+  id       String        @id @default(cuid())
+  name     String        @unique
+  slug     String        @unique
+  articles NewsArticle[]
+}
+
+model NewsArticle {
+  id            String       @id @default(cuid())
+  slug          String       @unique
+  title         String
+  summary       String       @db.Text
+  content       String       @db.Text
+  featuredImage String
+  author        String       @default("OAKS Editorial Team")
+  categoryId    String
+  category      NewsCategory @relation(fields: [categoryId], references: [id])
+  published     Boolean      @default(true)
+  publishedAt   DateTime     @default(now())
+  readingTime   String       @default("4 min read")
+  metaTitle     String?
+  metaDesc      String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([slug])
+  @@index([published])
+}
+
+model CompanyDocument {
+  id           String           @id @default(cuid())
+  title        String
+  description  String?          @db.Text
+  category     DocumentCategory @default(PROFILE)
+  fileUrl      String
+  fileName     String
+  fileSize     String?
+  isPublished  Boolean          @default(true)
+  displayOrder Int              @default(0)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model MediaAsset {
+  id        String   @id @default(cuid())
+  title     String
+  altText   String?
+  fileUrl   String
+  fileName  String
+  fileSize  Int?
+  mimeType  String?
+  createdAt DateTime @default(now())
+}
+
+model SiteSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   @db.Text
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id          String     @id @default(cuid())
+  adminUserId String?
+  adminUser   AdminUser? @relation(fields: [adminUserId], references: [id])
+  adminName   String
+  action      String
+  entityType  String
+  entityId    String?
+  details     String?    @db.Text
+  createdAt   DateTime   @default(now())
+}

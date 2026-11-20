@@ -1,0 +1,30 @@
+# Node modules
+/node_modules
+
+# Next.js build output
+/.next
+/out
+
+# Environment files
+.env*
+
+# Production logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor configs
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Misc
+.npm
+.yarn
+.pnp.*
