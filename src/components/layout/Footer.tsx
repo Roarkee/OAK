@@ -207,7 +207,7 @@ export function Footer() {
             <div className="space-y-3 text-sm text-brand-muted">
               <div className="flex items-start space-x-3">
                 <MapPin className="w-4 h-4 text-brand-gold shrink-0 mt-0.5" />
-                <span>Oaks Tower, 7th Floor, Bole Commercial Corridor, Addis Ababa, Ethiopia</span>
+                <span>Oaks Tower, 7th Floor, Airport City, Accra, Ghana</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-brand-gold shrink-0" />
